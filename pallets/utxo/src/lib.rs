@@ -150,8 +150,13 @@ pub mod pallet {
             }
 
             //add newly validated utxos
+            let mut idx: u32 = 0;
             for output in &transaction.outputs {
-                let hash = BlakeTwo256::hash_of(&output);
+                // create a unique and deterministic hash for each uxto in output
+                // Do not use random here, as then the hash will be different for
+                // other nodes in the network.
+                let hash = BlakeTwo256::hash_of(&(&output, idx));
+                idx = idx.saturating_add(1);
                 UtxoStore::<T>::insert(hash, Some(output.clone()));
             }
 
