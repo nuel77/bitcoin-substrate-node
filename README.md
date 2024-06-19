@@ -2,7 +2,7 @@
 
 A simple node, replicating bitcoin architecture for transaction
 
-Roadmap
+## Roadmap
 
 - [X] UTXO pallet
 - [ ] POW consensus
