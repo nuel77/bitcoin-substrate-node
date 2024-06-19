@@ -1,7 +1,7 @@
-#![deny(unused_crate_dependencies)]
-
 // We make sure this pallet uses `no_std` for compiling to Wasm.
 #![cfg_attr(not(feature = "std"), no_std)]
+
+pub use pallet::*;
 
 #[frame_support::pallet]
 pub mod pallet {
@@ -11,9 +11,11 @@ pub mod pallet {
     use frame_system::pallet_prelude::*;
     #[cfg(feature = "std")]
     use serde::{Deserialize, Serialize};
+
     use sp_runtime::traits::{BlakeTwo256, Hash};
     use sp_core::{
         sp_std::collections::btree_map::BTreeMap,
+        sp_std::vec::Vec,
         H256
     };
 

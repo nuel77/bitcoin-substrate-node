@@ -45,7 +45,7 @@ pub use sp_runtime::{Perbill, Permill};
 pub use pallet_template;
 
 /// Import utxo pallet.
-// pub use pallet_utxo;
+ pub use pallet_utxo;
 
 /// An index to a block.
 pub type BlockNumber = u32;
@@ -94,8 +94,8 @@ pub mod opaque {
 // https://docs.substrate.io/main-docs/build/upgrade#runtime-versioning
 #[sp_version::runtime_version]
 pub const VERSION: RuntimeVersion = RuntimeVersion {
-	spec_name: create_runtime_str!("solochain-template-runtime"),
-	impl_name: create_runtime_str!("solochain-template-runtime"),
+	spec_name: create_runtime_str!("bitcoin-substrate-node-runtime"),
+	impl_name: create_runtime_str!("bitcoin-substrate-node-runtime"),
 	authoring_version: 1,
 	// The version of the runtime specification. A full node will not attempt to use its native
 	//   runtime in substitute for the on-chain Wasm runtime unless all of `spec_name`,
@@ -255,9 +255,9 @@ impl pallet_template::Config for Runtime {
 }
 
 /// Configure pallet-utils in pallets/utxo.
-// impl pallet_utxo::Config for Runtime {
-// 	type RuntimeEvent = RuntimeEvent;
-// }
+impl pallet_utxo::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+}
 // Create the runtime by composing the FRAME pallets that were previously configured.
 #[frame_support::runtime]
 mod runtime {
@@ -301,8 +301,8 @@ mod runtime {
 	pub type TemplateModule = pallet_template;
 
 	// Include pallet-utxo in the runtime.
-	// #[runtime::pallet_index(8)]
-	// pub type Utxo = pallet_utxo;
+	#[runtime::pallet_index(8)]
+	pub type Utxo = pallet_utxo;
 }
 
 /// The address format for describing accounts.
@@ -353,6 +353,7 @@ mod benches {
 		[pallet_timestamp, Timestamp]
 		[pallet_sudo, Sudo]
 		[pallet_template, TemplateModule]
+		[pallet_utxo, Utxo]
 	);
 }
 
