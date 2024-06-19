@@ -1,14 +1,21 @@
+#![deny(unused_crate_dependencies)]
+
+// We make sure this pallet uses `no_std` for compiling to Wasm.
+#![cfg_attr(not(feature = "std"), no_std)]
+
 #[frame_support::pallet]
 pub mod pallet {
-    use sp_std::collections::btree_map::BTreeMap;
-    use codec::Codec;
     use frame_support::dispatch::DispatchResult;
     use frame_support::pallet_prelude::*;
     use frame_system::ensure_signed;
     use frame_system::pallet_prelude::*;
     #[cfg(feature = "std")]
     use serde::{Deserialize, Serialize};
-    use sp_core::{H256};
+    use sp_runtime::traits::{BlakeTwo256, Hash};
+    use sp_core::{
+        sp_std::collections::btree_map::BTreeMap,
+        H256
+    };
 
     #[pallet::pallet]
     pub struct Pallet<T>(_);
@@ -142,7 +149,7 @@ pub mod pallet {
 
             //add newly validated utxos
             for output in &transaction.outputs {
-                let hash = H256::random();
+                let hash = BlakeTwo256::hash_of(&output);
                 UtxoStore::<T>::insert(hash, Some(output.clone()));
             }
 
