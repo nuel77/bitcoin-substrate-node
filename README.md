@@ -31,19 +31,19 @@ The following command starts a single-node development chain that doesn't
 persist state:
 
 ```sh
-./target/release/node-template --dev
+./target/release/bitcoin-substrate-node --dev
 ```
 
 To purge the development chain's state, run the following command:
 
 ```sh
-./target/release/node-template purge-chain --dev
+./target/release/bitcoin-substrate-node purge-chain --dev
 ```
 
 To start the development chain with detailed logging, run the following command:
 
 ```sh
-RUST_BACKTRACE=1 ./target/release/node-template -ldebug --dev
+RUST_BACKTRACE=1 ./target/release/bitcoin-substrate-node -ldebug --dev
 ```
 
 Development chains:
@@ -62,7 +62,7 @@ similar to the following:
 $ mkdir my-chain-state
 
 // Use of that folder to store the chain state
-$ ./target/release/node-template --dev --base-path ./my-chain-state/
+$ ./target/release/bitcoin-substrate-node --dev --base-path ./my-chain-state/
 
 // Check the folder structure created inside the base path after running the chain
 $ ls ./my-chain-state
