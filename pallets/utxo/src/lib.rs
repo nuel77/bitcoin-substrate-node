@@ -162,12 +162,15 @@ pub mod pallet {
 
         let mut missing_utxos = Vec::new();
         let mut created_utxos = Vec::new();
+        let mut total_available = 0;
+        let mut total_spent = 0;
 
         for input in &transaction.inputs {
             //check if utxo exist in the store
             if let Some(utxo) = UtxoStore::<T>::get(input.utxo_id) {
                 // check if all utxo are from the same account
                 ensure!(from == utxo.owner, "Owner invalid");
+                total_available += utxo.value;
             } else {
                 missing_utxos.push(input.utxo_id.as_fixed_bytes().to_vec())
             }
@@ -180,13 +183,17 @@ pub mod pallet {
             let hash = transaction.hash_input_utxo(idx);
             idx = idx.saturating_add(1);
             created_utxos.push(hash.clone().as_fixed_bytes().to_vec())
+            mut total_spent += output.value;
         }
+
+        // check if the total spent is less than the total available
+        ensure!(total_spent < total_available, "Insufficient funds");
 
         Ok(ValidTransaction {
             priority: 1,
             requires: missing_utxos,
             provides: created_utxos,
-            longevity: 10,
+            longevity: 3,
             propagate: true,
         })
     }
