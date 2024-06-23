@@ -73,7 +73,7 @@ pub mod pallet {
     #[pallet::storage]
     #[pallet::getter(fn utxo_store)]
     pub(super) type UtxoStore<T: Config> =
-    StorageMap<_, Blake2_256, H256, Option<Utxo<T::AccountId>>, ValueQuery>;
+    StorageMap<_, Blake2_128Concat, H256, Option<Utxo<T::AccountId>>, ValueQuery>;
 
     #[pallet::event]
     #[pallet::generate_deposit(pub (super) fn deposit_event)]
@@ -210,7 +210,7 @@ pub mod pallet {
             // create a unique and deterministic hash for each uxto in output
             // Do not use random here, as then the hash will be different for
             // other nodes in the network.
-            let hash = transaction.hash_input_utxo(idx as u64);
+            let hash = transaction.hash_inDput_utxo(idx as u64);
             idx = idx.saturating_add(1);
             UtxoStore::<T>::insert(hash, Some(output.clone()));
         }
