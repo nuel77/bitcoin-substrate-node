@@ -19,6 +19,7 @@ use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
 
 use frame_support::genesis_builder_helper::{build_config, create_default_config};
+use frame_support::traits::IsSubType;
 pub use frame_support::{
 	construct_runtime, derive_impl, parameter_types,
 	traits::{
@@ -37,6 +38,7 @@ pub use frame_system::Call as SystemCall;
 pub use pallet_balances::Call as BalancesCall;
 pub use pallet_timestamp::Call as TimestampCall;
 use pallet_transaction_payment::{ConstFeeMultiplier, CurrencyAdapter, Multiplier};
+use sp_runtime::transaction_validity::{InvalidTransaction, TransactionValidityError};
 #[cfg(any(feature = "std", test))]
 pub use sp_runtime::BuildStorage;
 pub use sp_runtime::{Perbill, Permill};
@@ -45,7 +47,7 @@ pub use sp_runtime::{Perbill, Permill};
 pub use pallet_template;
 
 /// Import utxo pallet.
- pub use pallet_utxo;
+pub use pallet_utxo;
 
 /// An index to a block.
 pub type BlockNumber = u32;
@@ -258,6 +260,7 @@ impl pallet_template::Config for Runtime {
 impl pallet_utxo::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
 }
+
 // Create the runtime by composing the FRAME pallets that were previously configured.
 #[frame_support::runtime]
 mod runtime {
@@ -413,6 +416,14 @@ impl_runtime_apis! {
 			tx: <Block as BlockT>::Extrinsic,
 			block_hash: <Block as BlockT>::Hash,
 		) -> TransactionValidity {
+			//check for utxo transfer call
+			if let Some(pallet_utxo::Call::transfer{transaction: ref utxo_tx}) =
+				IsSubType::<pallet_utxo::Call::<Runtime>>::is_sub_type(&tx.function){
+				 return match pallet_utxo::validate_tx::<Runtime>(&utxo_tx, None){
+					Ok(valid_tx) =>  Ok(valid_tx) ,
+					Err(_) => Err(TransactionValidityError::Invalid(InvalidTransaction::Custom(1)))
+				}
+			}
 			Executive::validate_transaction(source, tx, block_hash)
 		}
 	}
