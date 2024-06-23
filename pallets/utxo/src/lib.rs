@@ -6,14 +6,15 @@ pub use pallet::*;
 //#[frame_support::pallet]
 #[frame_support::pallet(dev_mode)]
 pub mod pallet {
-	use frame_support::dispatch::DispatchResult;
-	use frame_support::pallet_prelude::*;
-	use frame_system::ensure_signed;
-	use frame_system::pallet_prelude::*;
+	use frame_support::{dispatch::DispatchResult, pallet_prelude::*};
+	use frame_system::{ensure_signed, pallet_prelude::*};
 	#[cfg(feature = "std")]
 	use serde::{Deserialize, Serialize};
 
-	use sp_core::{sp_std::collections::btree_map::BTreeMap, sp_std::vec::Vec, H256};
+	use sp_core::{
+		sp_std::{collections::btree_map::BTreeMap, vec::Vec},
+		H256,
+	};
 	use sp_runtime::traits::{BlakeTwo256, Hash};
 
 	#[pallet::pallet]
@@ -100,7 +101,7 @@ pub mod pallet {
 		) -> DispatchResult {
 			let who = ensure_signed(origin)?;
 			// Check that the extrinsic was signed and get the signer.
-			let validity = validate_tx::<T>(&transaction, Some(who))?;
+			let validity = validate_tx::<T>(&transaction, who)?;
 			ensure!(validity.requires.is_empty(), Error::<T>::InputsNotSatisfied);
 
 			// Update storage.
@@ -116,7 +117,7 @@ pub mod pallet {
 
 	pub fn validate_tx<T: Config>(
 		transaction: &Transaction<T::AccountId>,
-		from: Option<T::AccountId>,
+		from: T::AccountId,
 	) -> Result<ValidTransaction, &'static str> {
 		ensure!(transaction.inputs.len() > 0, "Transaction input length is 0");
 		ensure!(transaction.outputs.len() > 0, "Transaction output length is 0");
@@ -145,11 +146,8 @@ pub mod pallet {
 		for input in &transaction.inputs {
 			//check if utxo exist in the store
 			if let Some(utxo) = UtxoStore::<T>::get(input.utxo_id) {
-				// check if all utxo are from the same account (called by runtime)
-				// if called by transaction pool this check is not required.
-				if let Some(account) = from.clone() {
-					ensure!(account == utxo.owner, "Owner invalid");
-				}
+				// check if all utxo are from the same account
+				ensure!(from == utxo.owner, "Owner invalid");
 			} else {
 				missing_utxos.push(input.utxo_id.as_fixed_bytes().to_vec())
 			}

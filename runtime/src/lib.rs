@@ -11,15 +11,13 @@ use sp_runtime::{
 	create_runtime_str, generic, impl_opaque_keys,
 	traits::{BlakeTwo256, Block as BlockT, IdentifyAccount, NumberFor, One, Verify},
 	transaction_validity::{TransactionSource, TransactionValidity},
-	ApplyExtrinsicResult, MultiSignature,
+	ApplyExtrinsicResult, MultiAddress, MultiSignature,
 };
 use sp_std::prelude::*;
 #[cfg(feature = "std")]
 use sp_version::NativeVersion;
 use sp_version::RuntimeVersion;
 
-use frame_support::genesis_builder_helper::{build_config, create_default_config};
-use frame_support::traits::IsSubType;
 pub use frame_support::{
 	construct_runtime, derive_impl, parameter_types,
 	traits::{
@@ -33,6 +31,10 @@ pub use frame_support::{
 		IdentityFee, Weight,
 	},
 	StorageValue,
+};
+use frame_support::{
+	genesis_builder_helper::{build_config, create_default_config},
+	traits::IsSubType,
 };
 pub use frame_system::Call as SystemCall;
 pub use pallet_balances::Call as BalancesCall;
@@ -419,9 +421,13 @@ impl_runtime_apis! {
 			//check for utxo transfer call
 			if let Some(pallet_utxo::Call::transfer{transaction: ref utxo_tx}) =
 				IsSubType::<pallet_utxo::Call::<Runtime>>::is_sub_type(&tx.function){
-				 return match pallet_utxo::validate_tx::<Runtime>(&utxo_tx, None){
-					Ok(valid_tx) =>  Ok(valid_tx) ,
-					Err(_) => Err(TransactionValidityError::Invalid(InvalidTransaction::Custom(1)))
+				 return if let Some((MultiAddress::Id(address), _, _)) = tx.signature {
+					return match pallet_utxo::validate_tx::<Runtime>(&utxo_tx, address){
+						Ok(valid_tx) =>  Ok(valid_tx),
+						Err(_) => Err(TransactionValidityError::Invalid(InvalidTransaction::Custom(1)))
+					}
+				}else{
+					Err(TransactionValidityError::Invalid(InvalidTransaction::Custom(2)))
 				}
 			}
 			Executive::validate_transaction(source, tx, block_hash)
