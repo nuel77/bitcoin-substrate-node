@@ -170,7 +170,7 @@ pub mod pallet {
             if let Some(utxo) = UtxoStore::<T>::get(input.utxo_id) {
                 // check if all utxo are from the same account
                 ensure!(from == utxo.owner, "Owner invalid");
-                total_available += utxo.value;
+                total_available = total_available.saturating_add(utxo.value);
             } else {
                 missing_utxos.push(input.utxo_id.as_fixed_bytes().to_vec())
             }
@@ -182,8 +182,8 @@ pub mod pallet {
             ensure!(output.value > 0, "Output value is 0");
             let hash = transaction.hash_input_utxo(idx);
             idx = idx.saturating_add(1);
-            created_utxos.push(hash.clone().as_fixed_bytes().to_vec())
-            mut total_spent += output.value;
+            created_utxos.push(hash.clone().as_fixed_bytes().to_vec());
+            total_spent = total_spent.saturation_add(output.value);
         }
 
         // check if the total spent is less than the total available
