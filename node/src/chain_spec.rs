@@ -113,5 +113,10 @@ fn testnet_genesis(
 			// Assign network admin rights.
 			"key": Some(root_key),
 		},
+		"utxo":{
+			// initial supply of 21 million to alice
+			"supply": 2100,
+			"owner": Some(get_account_id_from_seed::<sr25519::Public>("Alice")),
+		}
 	})
 }
