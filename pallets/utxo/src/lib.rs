@@ -187,7 +187,7 @@ pub mod pallet {
         }
 
         // check if the total spent is less than the total available
-        ensure!(total_spent < total_available, "Insufficient funds");
+        ensure!(total_spent <= total_available, "Insufficient funds");
 
         Ok(ValidTransaction {
             priority: 1,
