@@ -1,6 +1,11 @@
 // We make sure this pallet uses `no_std` for compiling to Wasm.
 #![cfg_attr(not(feature = "std"), no_std)]
 
+#[cfg(test)]
+mod mock;
+#[cfg(test)]
+mod tests;
+
 pub use pallet::*;
 
 //#[frame_support::pallet]
@@ -162,8 +167,8 @@ pub mod pallet {
 
         let mut missing_utxos = Vec::new();
         let mut created_utxos = Vec::new();
-        let mut total_available = 0;
-        let mut total_spent = 0;
+        let mut total_available: u64 = 0;
+        let mut total_spent: u64 = 0;
 
         for input in &transaction.inputs {
             //check if utxo exist in the store
@@ -183,7 +188,7 @@ pub mod pallet {
             let hash = transaction.hash_input_utxo(idx);
             idx = idx.saturating_add(1);
             created_utxos.push(hash.clone().as_fixed_bytes().to_vec());
-            total_spent = total_spent.saturation_add(output.value);
+            total_spent = total_spent.saturating_add(output.value);
         }
 
         // check if the total spent is less than the total available
