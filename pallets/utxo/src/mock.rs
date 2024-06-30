@@ -55,13 +55,15 @@ impl pallet_utxo::Config for Test {
     type RuntimeEvent = RuntimeEvent;
 }
 
+pub const UTXO_KEY: KeyTypeId = KeyTypeId(*b"utxo");
+
 // Build genesis storage according to the mock runtime.
 pub fn new_test_ext() -> sp_io::TestExternalities {
-    pub const UTXO_KEY: KeyTypeId = KeyTypeId(*b"utxo");
 
     // keystore externality for test
     let keystore = MemoryKeystore::new();
     let alice_pub = keystore.sr25519_generate_new(UTXO_KEY, Some("//Alice")).unwrap();
+    keystore.sr25519_generate_new(UTXO_KEY, Some("//Bob")).unwrap();
 
     //create genesis config
     let mut t = frame_system::GenesisConfig::<Test>::default()

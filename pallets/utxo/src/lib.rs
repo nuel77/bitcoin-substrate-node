@@ -52,11 +52,28 @@ pub mod pallet {
         pub owner: AccountId,
     }
 
+    impl<AccountId> Utxo<AccountId> where AccountId: Parameter + Member + MaxEncodedLen{
+        pub fn new(value:u64, owner: AccountId) -> Self{
+            Self{
+                value,
+                owner
+            }
+        }
+    }
+
     #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
     #[derive(Clone, Encode, Decode, Eq, PartialEq, RuntimeDebug, Hash, Default, TypeInfo)]
     pub struct TransactionInput {
         /// id of the utxo to be spend
         pub utxo_id: H256,
+    }
+
+    impl TransactionInput {
+        pub fn new(utxo_id: H256) -> Self {
+            Self {
+                utxo_id,
+            }
+        }
     }
 
     #[cfg_attr(feature = "std", derive(Serialize, Deserialize))]
@@ -100,7 +117,7 @@ pub mod pallet {
             if let Some(account) = &self.owner {
                 let utxo = Utxo {
                     value: self.supply,
-                    owner: account.clone()
+                    owner: account.clone(),
                 };
                 UtxoStore::<T>::insert(H256::zero(), Some(utxo));
             }
